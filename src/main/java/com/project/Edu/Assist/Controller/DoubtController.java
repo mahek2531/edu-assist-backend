@@ -48,6 +48,9 @@ public class DoubtController {
     @Autowired
     private JuniorStudentService juniorStudentService;
 
+    @Autowired
+    private com.project.Edu.Assist.Service.CloudinaryService cloudinaryService;
+
     @PostMapping("/post/{student_id}")
     public ResponseEntity<?> postDoubt(@PathVariable Long student_id,
                                        @ModelAttribute DoubtDTO studentDoubtDTO) {
@@ -62,7 +65,7 @@ public class DoubtController {
             MultipartFile doubtPic = studentDoubtDTO.getDoubtPic();
 
             if (doubtPic != null && !doubtPic.isEmpty()) {
-                image = saveOptimizedFile(doubtPic);
+                image = cloudinaryService.uploadFile(doubtPic);
             }
 
             Doubt doubt = new Doubt();
@@ -290,102 +293,5 @@ public class DoubtController {
         }
     }
 
-    private String saveOptimizedFile(MultipartFile file) {
-        try {
-            String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase();
-            String originalFileName = file.getOriginalFilename() == null ? "file" : file.getOriginalFilename();
 
-            String baseName = UUID.randomUUID().toString();
-            Path uploadDir = Paths.get("uploads", "images").toAbsolutePath().normalize();
-
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
-
-            if (contentType.startsWith("image/")) {
-                BufferedImage originalImage;
-                try (InputStream inputStream = file.getInputStream()) {
-                    originalImage = ImageIO.read(inputStream);
-                }
-
-                if (originalImage == null) {
-                    String fallbackName = baseName + "_" + originalFileName;
-                    Files.copy(file.getInputStream(), uploadDir.resolve(fallbackName), StandardCopyOption.REPLACE_EXISTING);
-                    return fallbackName;
-                }
-
-                BufferedImage resized = resizeImage(originalImage, 1280, 1280);
-
-                if (contentType.contains("png")) {
-                    String fileName = baseName + ".png";
-                    ImageIO.write(resized, "png", uploadDir.resolve(fileName).toFile());
-                    return fileName;
-                } else {
-                    String fileName = baseName + ".jpg";
-                    writeJpeg(resized, uploadDir.resolve(fileName), 0.72f);
-                    return fileName;
-                }
-            }
-
-            String fallbackName = baseName + "_" + originalFileName;
-            Files.copy(file.getInputStream(), uploadDir.resolve(fallbackName), StandardCopyOption.REPLACE_EXISTING);
-            return fallbackName;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error while saving doubt attachment: " + e.getMessage(), e);
-        }
-    }
-
-    private BufferedImage resizeImage(BufferedImage originalImage, int maxWidth, int maxHeight) {
-        int width = originalImage.getWidth();
-        int height = originalImage.getHeight();
-
-        if (width <= maxWidth && height <= maxHeight) {
-            BufferedImage copy = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = copy.createGraphics();
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2d.drawImage(originalImage, 0, 0, null);
-            g2d.dispose();
-            return copy;
-        }
-
-        double widthRatio = (double) maxWidth / width;
-        double heightRatio = (double) maxHeight / height;
-        double ratio = Math.min(widthRatio, heightRatio);
-
-        int newWidth = (int) (width * ratio);
-        int newHeight = (int) (height * ratio);
-
-        BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = resized.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
-        g2d.dispose();
-
-        return resized;
-    }
-
-    private void writeJpeg(BufferedImage image, Path outputPath, float quality) throws IOException {
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
-        if (!writers.hasNext()) {
-            ImageIO.write(image, "jpg", outputPath.toFile());
-            return;
-        }
-
-        ImageWriter writer = writers.next();
-        try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputPath.toFile())) {
-            writer.setOutput(ios);
-            ImageWriteParam param = writer.getDefaultWriteParam();
-
-            if (param.canWriteCompressed()) {
-                param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                param.setCompressionQuality(quality);
-            }
-
-            writer.write(null, new IIOImage(image, null, null), param);
-        } finally {
-            writer.dispose();
-        }
-    }
 }

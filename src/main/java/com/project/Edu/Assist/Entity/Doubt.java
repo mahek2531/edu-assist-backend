@@ -34,6 +34,7 @@ public class Doubt {
     @Column(length = 50)
     private DoubtStatus status = DoubtStatus.PENDING;
 
+    @Builder.Default
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private boolean isVerified = false;
 

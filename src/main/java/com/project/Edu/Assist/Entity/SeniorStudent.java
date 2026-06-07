@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "seniorstudent")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,8 +23,13 @@ public class SeniorStudent {
     private Long id;
 
     private String name;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
+
+    @Column(unique = true)
     private String rollNumber;
 
     @CreationTimestamp
@@ -40,7 +46,9 @@ public class SeniorStudent {
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private boolean autoVerified = false;
 
+    @Builder.Default
     private Long solvedCount = 0L;
+
     private String photo;
 
     @Column(name = "expertise_subjects", length = 500)

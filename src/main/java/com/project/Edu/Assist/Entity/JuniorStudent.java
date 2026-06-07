@@ -1,6 +1,11 @@
 package com.project.Edu.Assist.Entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +16,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "juniorstudent")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,8 +28,13 @@ public class JuniorStudent {
     private Long id;
 
     private String name;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
+
+    @Column(unique = true)
     private String rollNumber;
 
     @CreationTimestamp
@@ -32,10 +43,11 @@ public class JuniorStudent {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // FIXED: renamed from 'isVerified' → 'verified'
+    @Builder.Default
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private boolean verified = false;
 
+    @Builder.Default
     @Column(nullable = false)
     private Long doubtCount = 0L;
 
@@ -43,14 +55,14 @@ public class JuniorStudent {
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private boolean autoVerified = false;
 
-
-
+    @Builder.Default
     private Long pending = 0L;
+
+    @Builder.Default
     private Long solvedCount = 0L;
 
     private String photo;
 
-    // Optional: keeping explicit getter/setter (not required due to Lombok, but safe)
     public Long getDoubtCount() {
         return doubtCount;
     }

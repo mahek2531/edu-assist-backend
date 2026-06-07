@@ -12,9 +12,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadPath = Paths.get("uploads", "images").toAbsolutePath().normalize();
-
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + uploadPath.toString() + "/");
+        // Removed local image resource handler since images are now served directly from Cloudinary URLs
     }
 }

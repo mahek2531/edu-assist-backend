@@ -4,6 +4,7 @@ import com.project.Edu.Assist.DTO.ResetPasswordDTO;
 import com.project.Edu.Assist.DTO.UpdateDTO;
 import com.project.Edu.Assist.Entity.Doubt;
 import com.project.Edu.Assist.Entity.JuniorStudent;
+import com.project.Edu.Assist.Repository.ChatMessageRepository;
 import com.project.Edu.Assist.Repository.DoubtRepository;
 import com.project.Edu.Assist.Repository.JuniorStudentRepository;
 import com.project.Edu.Assist.Repository.SeniorStudentRepository;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.project.Edu.Assist.Repository.ChatMessageRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -251,7 +251,6 @@ public class JuniorStudentService implements IJuniorStudentService {
 
         if (linkedDoubts != null && !linkedDoubts.isEmpty()) {
             for (Doubt doubt : linkedDoubts) {
-                // delete chat messages for this doubt first
                 chatMessageRepository.deleteByDoubt_Id(doubt.getId());
             }
 
